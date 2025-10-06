@@ -1,6 +1,43 @@
 {
   "programs": [
     {
+      "name": "Coude - Programme complet",
+      "description": "Rééducation coude avec pauses longues",
+      "exercises": [
+        {
+          "name": "Extension-Flexion sur table",
+          "duration": 20,
+          "rest": 10,
+          "sets": 1,
+          "notes": "Bras à plat sur la table, mouvement lent et contrôlé",
+          "pauseAfter": 45
+        },
+        {
+          "name": "Extension sur coussin",
+          "duration": 30,
+          "rest": 15,
+          "sets": 1,
+          "notes": "Coude posé sur coussin, extension progressive",
+          "pauseAfter": 45
+        },
+        {
+          "name": "Épaule-Coude: Mouvement de brasse",
+          "duration": 20,
+          "rest": 10,
+          "sets": 1,
+          "notes": "Mouvement ample comme en natation",
+          "pauseAfter": 45
+        },
+        {
+          "name": "Flexion sur coussin",
+          "duration": 30,
+          "rest": 15,
+          "sets": 1,
+          "notes": "Coude sur coussin, flexion douce jusqu'à l'épaule"
+        }
+      ]
+    },
+    {
       "name": "Épaule - Semaine 1",
       "description": "Programme débutant pour rééducation épaule",
       "exercises": [

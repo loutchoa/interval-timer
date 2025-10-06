@@ -366,6 +366,11 @@
             50% { transform: scale(1.05); }
         }
 
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.3; }
+        }
+
         .timer.working {
             color: #00ff88;
             animation: pulse 1s infinite;
@@ -373,6 +378,11 @@
 
         .timer.resting {
             color: #ffd700;
+        }
+
+        .timer.blinking {
+            animation: blink 0.5s infinite, pulse 1s infinite;
+            color: #ff4444 !important;
         }
 
         /* Responsive */
