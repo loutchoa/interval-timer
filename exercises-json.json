@@ -1,0 +1,221 @@
+{
+  "programs": [
+    {
+      "name": "Épaule - Semaine 1",
+      "description": "Programme débutant pour rééducation épaule",
+      "exercises": [
+        {
+          "name": "Rotation externe légère",
+          "duration": 30,
+          "rest": 15,
+          "sets": 3,
+          "notes": "Bras le long du corps, coude à 90°"
+        },
+        {
+          "name": "Élévation latérale passive",
+          "duration": 30,
+          "rest": 15,
+          "sets": 3,
+          "notes": "Assistance avec l'autre bras"
+        },
+        {
+          "name": "Pendule (Codman)",
+          "duration": 45,
+          "rest": 20,
+          "sets": 2,
+          "notes": "Mouvement circulaire, relâché"
+        }
+      ]
+    },
+    {
+      "name": "Épaule - Semaine 2-3",
+      "description": "Progression avec résistance légère",
+      "exercises": [
+        {
+          "name": "Rotation externe avec élastique",
+          "duration": 40,
+          "rest": 20,
+          "sets": 3,
+          "notes": "Élastique léger (jaune ou rouge)"
+        },
+        {
+          "name": "Élévation scapulaire",
+          "duration": 30,
+          "rest": 15,
+          "sets": 4,
+          "notes": "Haussement d'épaules contrôlé"
+        },
+        {
+          "name": "Flexion avant assistée",
+          "duration": 35,
+          "rest": 15,
+          "sets": 3,
+          "notes": "Avec bâton ou élastique"
+        }
+      ]
+    },
+    {
+      "name": "Genou - Renforcement basique",
+      "description": "Quadriceps et stabilisation",
+      "exercises": [
+        {
+          "name": "Extension isométrique",
+          "duration": 20,
+          "rest": 10,
+          "sets": 4,
+          "notes": "Jambe tendue, maintenir contraction"
+        },
+        {
+          "name": "Mini-squat mural",
+          "duration": 30,
+          "rest": 15,
+          "sets": 3,
+          "notes": "Dos contre mur, descendre 45°"
+        },
+        {
+          "name": "Montée de marche",
+          "duration": 40,
+          "rest": 20,
+          "sets": 3,
+          "notes": "Marche basse, alterner jambes"
+        },
+        {
+          "name": "Pont (Bridge)",
+          "duration": 25,
+          "rest": 15,
+          "sets": 3,
+          "notes": "Soulever bassin, serrer fessiers"
+        }
+      ]
+    },
+    {
+      "name": "Genou - Proprioception",
+      "description": "Équilibre et stabilité",
+      "exercises": [
+        {
+          "name": "Équilibre unipodal",
+          "duration": 30,
+          "rest": 15,
+          "sets": 3,
+          "notes": "Sur une jambe, yeux ouverts"
+        },
+        {
+          "name": "Transfert de poids",
+          "duration": 40,
+          "rest": 15,
+          "sets": 3,
+          "notes": "Latéral, contrôlé"
+        },
+        {
+          "name": "Step latéral",
+          "duration": 45,
+          "rest": 20,
+          "sets": 3,
+          "notes": "Sur plateforme instable si possible"
+        }
+      ]
+    },
+    {
+      "name": "Dos - Mobilité lombaire",
+      "description": "Assouplissement et mobilité",
+      "exercises": [
+        {
+          "name": "Cat-Cow (Chat-Vache)",
+          "duration": 30,
+          "rest": 10,
+          "sets": 3,
+          "notes": "Alternance flexion/extension"
+        },
+        {
+          "name": "Rotation thoracique",
+          "duration": 30,
+          "rest": 15,
+          "sets": 3,
+          "notes": "À quatre pattes, main derrière tête"
+        },
+        {
+          "name": "Child's pose (Posture enfant)",
+          "duration": 45,
+          "rest": 15,
+          "sets": 2,
+          "notes": "Étirement passif, respiration profonde"
+        },
+        {
+          "name": "Pelvic tilt",
+          "duration": 25,
+          "rest": 10,
+          "sets": 3,
+          "notes": "Dos au sol, basculer bassin"
+        }
+      ]
+    },
+    {
+      "name": "Dos - Renforcement core",
+      "description": "Stabilisation abdominale et dorsale",
+      "exercises": [
+        {
+          "name": "Planche (front plank)",
+          "duration": 20,
+          "rest": 15,
+          "sets": 3,
+          "notes": "Sur avant-bras, corps aligné"
+        },
+        {
+          "name": "Bird-dog",
+          "duration": 30,
+          "rest": 15,
+          "sets": 3,
+          "notes": "Bras et jambe opposés tendus"
+        },
+        {
+          "name": "Superman",
+          "duration": 25,
+          "rest": 15,
+          "sets": 3,
+          "notes": "Soulever bras et jambes au sol"
+        },
+        {
+          "name": "Dead bug",
+          "duration": 35,
+          "rest": 15,
+          "sets": 3,
+          "notes": "Dos au sol, mouvements alternés"
+        }
+      ]
+    },
+    {
+      "name": "Session rapide - 10min",
+      "description": "Maintenance générale rapide",
+      "exercises": [
+        {
+          "name": "Étirement chat-vache",
+          "duration": 30,
+          "rest": 10,
+          "sets": 2,
+          "notes": "Mobilité dorsale"
+        },
+        {
+          "name": "Rotation épaules",
+          "duration": 30,
+          "rest": 10,
+          "sets": 2,
+          "notes": "Cercles avant et arrière"
+        },
+        {
+          "name": "Mini-squats",
+          "duration": 30,
+          "rest": 15,
+          "sets": 2,
+          "notes": "Légers, contrôlés"
+        },
+        {
+          "name": "Planche courte",
+          "duration": 15,
+          "rest": 15,
+          "sets": 2,
+          "notes": "Sur avant-bras"
+        }
+      ]
+    }
+  ]
+}
