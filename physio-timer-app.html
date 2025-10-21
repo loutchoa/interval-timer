@@ -1,0 +1,990 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <title>Physio Timer</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            text-align: center;
+            font-size: 2em;
+            margin-bottom: 30px;
+        }
+
+        /* Tabs */
+        .tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            border-bottom: 2px solid rgba(255,255,255,0.2);
+        }
+
+        .tab {
+            padding: 12px 24px;
+            background: none;
+            border: none;
+            color: rgba(255,255,255,0.6);
+            font-size: 1em;
+            cursor: pointer;
+            border-bottom: 3px solid transparent;
+            transition: all 0.3s;
+        }
+
+        .tab.active {
+            color: white;
+            border-bottom-color: white;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        /* Card */
+        .card {
+            background: rgba(255,255,255,0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 25px;
+            margin-bottom: 20px;
+            border: 1px solid rgba(255,255,255,0.2);
+        }
+
+        /* Timer Display */
+        .timer-display {
+            text-align: center;
+            padding: 40px 20px;
+        }
+
+        .timer-name {
+            font-size: 1.8em;
+            margin-bottom: 20px;
+            font-weight: 600;
+        }
+
+        .timer-time {
+            font-size: 6em;
+            font-weight: bold;
+            font-variant-numeric: tabular-nums;
+            margin: 30px 0;
+        }
+
+        .timer-time.warning {
+            color: #ff6b6b;
+            animation: pulse 0.5s infinite;
+        }
+
+        .timer-status {
+            font-size: 1.2em;
+            color: rgba(255,255,255,0.8);
+        }
+
+        .progress-info {
+            font-size: 1.1em;
+            margin-top: 20px;
+            color: rgba(255,255,255,0.9);
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        /* Controls */
+        .controls {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .btn {
+            padding: 18px;
+            font-size: 1.1em;
+            font-weight: 600;
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s;
+            color: white;
+        }
+
+        .btn:active {
+            transform: scale(0.95);
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            grid-column: 1 / -1;
+        }
+
+        .btn-success {
+            background: #51cf66;
+        }
+
+        .btn-warning {
+            background: #ffd43b;
+            color: #333;
+        }
+
+        .btn-danger {
+            background: #ff6b6b;
+        }
+
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        /* Session Selector */
+        select {
+            width: 100%;
+            padding: 15px;
+            font-size: 1em;
+            border-radius: 10px;
+            border: 2px solid rgba(255,255,255,0.3);
+            background: rgba(255,255,255,0.2);
+            color: white;
+            cursor: pointer;
+        }
+
+        select option {
+            background: #667eea;
+            color: white;
+        }
+
+        /* Editor */
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+        }
+
+        input[type="text"],
+        input[type="number"],
+        textarea {
+            width: 100%;
+            padding: 12px;
+            border-radius: 8px;
+            border: 2px solid rgba(255,255,255,0.3);
+            background: rgba(255,255,255,0.2);
+            color: white;
+            font-size: 1em;
+        }
+
+        input::placeholder,
+        textarea::placeholder {
+            color: rgba(255,255,255,0.5);
+        }
+
+        textarea {
+            min-height: 200px;
+            font-family: monospace;
+            font-size: 0.9em;
+        }
+
+        /* Session List */
+        .session-item {
+            background: rgba(255,255,255,0.15);
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .session-item-name {
+            font-weight: 600;
+            font-size: 1.1em;
+        }
+
+        .session-item-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .icon-btn {
+            background: rgba(255,255,255,0.2);
+            border: none;
+            color: white;
+            width: 40px;
+            height: 40px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1.2em;
+        }
+
+        .icon-btn:hover {
+            background: rgba(255,255,255,0.3);
+        }
+
+        /* Collapsible sections */
+        .collapsible {
+            background: rgba(255,255,255,0.1);
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 15px;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .collapsible-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease;
+        }
+
+        .collapsible-content.open {
+            max-height: 2000px;
+        }
+
+        .grid-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+
+        .grid-3 {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 10px;
+        }
+
+        /* Responsive */
+        @media (max-width: 600px) {
+            .timer-time {
+                font-size: 4em;
+            }
+            
+            .grid-2, .grid-3 {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>⏱️ Physio Timer</h1>
+
+        <!-- Tabs -->
+        <div class="tabs">
+            <button class="tab active" data-tab="timer">Timer</button>
+            <button class="tab" data-tab="sessions">Sessions</button>
+            <button class="tab" data-tab="editor">Editor</button>
+            <button class="tab" data-tab="import">Import/Export</button>
+        </div>
+
+        <!-- TIMER TAB -->
+        <div id="timer-tab" class="tab-content active">
+            <div class="card">
+                <div class="form-group">
+                    <label class="form-label">Select Session</label>
+                    <select id="sessionSelect">
+                        <option value="">Choose a session...</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="card timer-display">
+                <div class="timer-name" id="timerName">Ready</div>
+                <div class="timer-time" id="timerTime">00:00</div>
+                <div class="timer-status" id="timerStatus">Select a session to begin</div>
+                <div class="progress-info" id="progressInfo"></div>
+            </div>
+
+            <div class="card">
+                <div class="controls">
+                    <button class="btn btn-primary" id="startBtn">▶️ Start</button>
+                    <button class="btn btn-warning" id="pauseBtn" disabled>⏸️ Pause</button>
+                    <button class="btn btn-danger" id="stopBtn" disabled>⏹️ Stop</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- SESSIONS TAB -->
+        <div id="sessions-tab" class="tab-content">
+            <div class="card">
+                <h2 style="margin-bottom: 20px;">My Sessions</h2>
+                <button class="btn btn-primary" id="newSessionBtn" style="margin-bottom: 20px;">➕ New Session</button>
+                <div id="sessionsList"></div>
+            </div>
+        </div>
+
+        <!-- EDITOR TAB -->
+        <div id="editor-tab" class="tab-content">
+            <div class="card" id="editorCard" style="display: none;">
+                <h2 style="margin-bottom: 20px;">Session Editor</h2>
+                
+                <div class="form-group">
+                    <label class="form-label">Session Name</label>
+                    <input type="text" id="sessionName" placeholder="e.g., Elbow Rehabilitation">
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Cycle Rest Time (seconds)</label>
+                    <input type="number" id="cycleRestTime" value="45" min="0">
+                </div>
+
+                <h3 style="margin: 20px 0;">Cycles</h3>
+                <button class="btn btn-success" id="addCycleBtn" style="margin-bottom: 15px;">➕ Add Cycle</button>
+                <div id="cyclesList"></div>
+
+                <div style="margin-top: 30px;">
+                    <button class="btn btn-primary" id="saveSessionBtn">💾 Save Session</button>
+                    <button class="btn btn-danger" id="cancelEditBtn" style="margin-top: 10px;">✕ Cancel</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- IMPORT/EXPORT TAB -->
+        <div id="import-tab" class="tab-content">
+            <div class="card">
+                <h2 style="margin-bottom: 20px;">Export</h2>
+                <button class="btn btn-success" id="exportBtn" style="margin-bottom: 15px;">📋 Copy All Sessions to Clipboard</button>
+                <textarea id="exportArea" readonly style="background: rgba(0,0,0,0.3);"></textarea>
+            </div>
+
+            <div class="card">
+                <h2 style="margin-bottom: 20px;">Import</h2>
+                <textarea id="importArea" placeholder='Paste JSON here...'></textarea>
+                <button class="btn btn-primary" id="importBtn" style="margin-top: 15px;">📥 Import Sessions</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        class PhysioTimer {
+            constructor() {
+                this.sessions = [];
+                this.currentSession = null;
+                this.currentSessionIndex = -1;
+                this.isRunning = false;
+                this.isPaused = false;
+                this.audioContext = null;
+                this.editingIndex = -1;
+                
+                // Current position in session
+                this.cycleIndex = 0;
+                this.subcycleIndex = 0;
+                this.exerciseRepIndex = 0;
+                this.isInRest = false;
+                this.restType = ''; // 'exercise', 'subcycle', 'cycle'
+                this.remainingTime = 0;
+                
+                this.init();
+            }
+
+            init() {
+                this.initAudio();
+                this.loadSessions();
+                this.setupEventListeners();
+                this.updateUI();
+            }
+
+            initAudio() {
+                this.audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            }
+
+            playBeep(frequency = 800, duration = 0.2) {
+                const osc = this.audioContext.createOscillator();
+                const gain = this.audioContext.createGain();
+                
+                osc.connect(gain);
+                gain.connect(this.audioContext.destination);
+                
+                osc.frequency.value = frequency;
+                osc.type = 'sine';
+                
+                gain.gain.setValueAtTime(0.3, this.audioContext.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.01, this.audioContext.currentTime + duration);
+                
+                osc.start(this.audioContext.currentTime);
+                osc.stop(this.audioContext.currentTime + duration);
+            }
+
+            speak(text) {
+                if ('speechSynthesis' in window) {
+                    const utterance = new SpeechSynthesisUtterance(text);
+                    utterance.lang = 'en-US';
+                    utterance.rate = 0.9;
+                    window.speechSynthesis.speak(utterance);
+                }
+            }
+
+            // Storage
+            loadSessions() {
+                const stored = localStorage.getItem('physioSessions');
+                if (stored) {
+                    this.sessions = JSON.parse(stored);
+                } else {
+                    this.sessions = this.getDefaultSessions();
+                    this.saveSessions();
+                }
+            }
+
+            saveSessions() {
+                localStorage.setItem('physioSessions', JSON.stringify(this.sessions));
+                const lastSession = localStorage.getItem('lastSession');
+                this.updateUI();
+            }
+
+            getDefaultSessions() {
+                return [{
+                    name: "Elbow Rehabilitation",
+                    cycleRestTime: 45,
+                    cycles: [
+                        {
+                            subcycleRestTime: 0,
+                            subcycles: [
+                                {
+                                    exerciseName: "Extension-Flexion on table",
+                                    duration: 20,
+                                    repetitions: 1,
+                                    exerciseRestTime: 10
+                                }
+                            ]
+                        },
+                        {
+                            subcycleRestTime: 0,
+                            subcycles: [
+                                {
+                                    exerciseName: "Extension on cushion",
+                                    duration: 30,
+                                    repetitions: 1,
+                                    exerciseRestTime: 15
+                                }
+                            ]
+                        },
+                        {
+                            subcycleRestTime: 0,
+                            subcycles: [
+                                {
+                                    exerciseName: "Shoulder-Elbow: Breaststroke motion",
+                                    duration: 20,
+                                    repetitions: 1,
+                                    exerciseRestTime: 10
+                                }
+                            ]
+                        },
+                        {
+                            subcycleRestTime: 0,
+                            subcycles: [
+                                {
+                                    exerciseName: "Flexion on cushion",
+                                    duration: 30,
+                                    repetitions: 1,
+                                    exerciseRestTime: 15
+                                }
+                            ]
+                        }
+                    ]
+                }];
+            }
+
+            // UI Setup
+            setupEventListeners() {
+                // Tabs
+                document.querySelectorAll('.tab').forEach(tab => {
+                    tab.addEventListener('click', () => this.switchTab(tab.dataset.tab));
+                });
+
+                // Timer controls
+                document.getElementById('sessionSelect').addEventListener('change', (e) => {
+                    if (e.target.value !== '') {
+                        this.selectSession(parseInt(e.target.value));
+                    }
+                });
+                document.getElementById('startBtn').addEventListener('click', () => this.start());
+                document.getElementById('pauseBtn').addEventListener('click', () => this.togglePause());
+                document.getElementById('stopBtn').addEventListener('click', () => this.stop());
+
+                // Sessions
+                document.getElementById('newSessionBtn').addEventListener('click', () => this.newSession());
+
+                // Editor
+                document.getElementById('addCycleBtn').addEventListener('click', () => this.addCycle());
+                document.getElementById('saveSessionBtn').addEventListener('click', () => this.saveCurrentSession());
+                document.getElementById('cancelEditBtn').addEventListener('click', () => this.cancelEdit());
+
+                // Import/Export
+                document.getElementById('exportBtn').addEventListener('click', () => this.exportSessions());
+                document.getElementById('importBtn').addEventListener('click', () => this.importSessions());
+            }
+
+            switchTab(tabName) {
+                document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+                document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+                
+                document.querySelector(`[data-tab="${tabName}"]`).classList.add('active');
+                document.getElementById(`${tabName}-tab`).classList.add('active');
+            }
+
+            updateUI() {
+                this.updateSessionSelect();
+                this.updateSessionsList();
+                this.updateExportArea();
+            }
+
+            updateSessionSelect() {
+                const select = document.getElementById('sessionSelect');
+                const lastSession = localStorage.getItem('lastSession');
+                
+                select.innerHTML = '<option value="">Choose a session...</option>';
+                this.sessions.forEach((session, index) => {
+                    const option = document.createElement('option');
+                    option.value = index;
+                    option.textContent = session.name;
+                    if (lastSession && session.name === lastSession) {
+                        option.selected = true;
+                        this.selectSession(index);
+                    }
+                    select.appendChild(option);
+                });
+            }
+
+            updateSessionsList() {
+                const container = document.getElementById('sessionsList');
+                if (this.sessions.length === 0) {
+                    container.innerHTML = '<p style="color: rgba(255,255,255,0.6);">No sessions yet. Create one!</p>';
+                    return;
+                }
+
+                container.innerHTML = this.sessions.map((session, index) => `
+                    <div class="session-item">
+                        <div>
+                            <div class="session-item-name">${session.name}</div>
+                            <div style="font-size: 0.9em; color: rgba(255,255,255,0.7);">
+                                ${session.cycles.length} cycle(s)
+                            </div>
+                        </div>
+                        <div class="session-item-actions">
+                            <button class="icon-btn" onclick="app.editSession(${index})">✏️</button>
+                            <button class="icon-btn" onclick="app.duplicateSession(${index})">📋</button>
+                            <button class="icon-btn" onclick="app.deleteSession(${index})">🗑️</button>
+                        </div>
+                    </div>
+                `).join('');
+            }
+
+            updateExportArea() {
+                document.getElementById('exportArea').value = JSON.stringify(this.sessions, null, 2);
+            }
+
+            // Session management
+            selectSession(index) {
+                this.currentSession = this.sessions[index];
+                this.currentSessionIndex = index;
+                localStorage.setItem('lastSession', this.currentSession.name);
+                this.resetPosition();
+                document.getElementById('timerName').textContent = this.currentSession.name;
+                document.getElementById('timerStatus').textContent = 'Ready to start';
+            }
+
+            resetPosition() {
+                this.cycleIndex = 0;
+                this.subcycleIndex = 0;
+                this.exerciseRepIndex = 0;
+                this.isInRest = false;
+                this.remainingTime = 0;
+            }
+
+            // Timer logic
+            start() {
+                if (!this.currentSession) {
+                    alert('Please select a session first');
+                    return;
+                }
+
+                this.isRunning = true;
+                this.isPaused = false;
+                this.resetPosition();
+
+                document.getElementById('startBtn').disabled = true;
+                document.getElementById('pauseBtn').disabled = false;
+                document.getElementById('stopBtn').disabled = false;
+                document.getElementById('sessionSelect').disabled = true;
+
+                this.speak('Starting session');
+                this.runSession();
+            }
+
+            togglePause() {
+                this.isPaused = !this.isPaused;
+                const btn = document.getElementById('pauseBtn');
+                btn.textContent = this.isPaused ? '▶️ Resume' : '⏸️ Pause';
+            }
+
+            stop() {
+                this.isRunning = false;
+                this.isPaused = false;
+
+                document.getElementById('startBtn').disabled = false;
+                document.getElementById('pauseBtn').disabled = true;
+                document.getElementById('stopBtn').disabled = true;
+                document.getElementById('sessionSelect').disabled = false;
+                document.getElementById('timerTime').classList.remove('warning');
+
+                document.getElementById('timerStatus').textContent = 'Stopped';
+            }
+
+            async runSession() {
+                const cycles = this.currentSession.cycles;
+
+                for (this.cycleIndex = 0; this.cycleIndex < cycles.length; this.cycleIndex++) {
+                    if (!this.isRunning) return;
+
+                    await this.runCycle(cycles[this.cycleIndex]);
+
+                    // Cycle rest (except after last cycle)
+                    if (this.cycleIndex < cycles.length - 1 && this.currentSession.cycleRestTime > 0) {
+                        await this.runRest('Cycle Rest', this.currentSession.cycleRestTime);
+                    }
+                }
+
+                this.complete();
+            }
+
+            async runCycle(cycle) {
+                const subcycles = cycle.subcycles;
+
+                for (this.subcycleIndex = 0; this.subcycleIndex < subcycles.length; this.subcycleIndex++) {
+                    if (!this.isRunning) return;
+
+                    await this.runSubcycle(subcycles[this.subcycleIndex]);
+
+                    // Subcycle rest (except after last subcycle)
+                    if (this.subcycleIndex < subcycles.length - 1 && cycle.subcycleRestTime > 0) {
+                        await this.runRest('Subcycle Rest', cycle.subcycleRestTime);
+                    }
+                }
+            }
+
+            async runSubcycle(subcycle) {
+                for (this.exerciseRepIndex = 0; this.exerciseRepIndex < subcycle.repetitions; this.exerciseRepIndex++) {
+                    if (!this.isRunning) return;
+
+                    // Exercise
+                    await this.runExercise(subcycle.exerciseName, subcycle.duration);
+
+                    // Exercise rest (except after last rep)
+                    if (this.exerciseRepIndex < subcycle.repetitions - 1 && subcycle.exerciseRestTime > 0) {
+                        await this.runRest('Exercise Rest', subcycle.exerciseRestTime);
+                    }
+                }
+            }
+
+            async runExercise(name, duration) {
+                this.isInRest = false;
+                document.getElementById('timerName').textContent = name;
+                this.speak(name);
+                this.playBeep(800, 0.2);
+                await this.countdown(duration);
+            }
+
+            async runRest(name, duration) {
+                this.isInRest = true;
+                document.getElementById('timerName').textContent = name;
+                this.speak('Rest');
+                this.playBeep(400, 0.2);
+                await this.countdown(duration);
+            }
+
+            async countdown(seconds) {
+                this.remainingTime = seconds;
+
+                while (this.remainingTime > 0) {
+                    if (!this.isRunning) return;
+
+                    while (this.isPaused) {
+                        await this.sleep(100);
+                        if (!this.isRunning) return;
+                    }
+
+                    this.updateTimerDisplay();
+
+                    // Warning for last 3 seconds
+                    if (this.remainingTime <= 3) {
+                        document.getElementById('timerTime').classList.add('warning');
+                        this.playBeep(1200, 0.1);
+                        if (this.remainingTime === 1) {
+                            this.speak('Go');
+                        }
+                    } else {
+                        document.getElementById('timerTime').classList.remove('warning');
+                    }
+
+                    await this.sleep(1000);
+                    this.remainingTime--;
+                }
+
+                document.getElementById('timerTime').classList.remove('warning');
+            }
+
+            updateTimerDisplay() {
+                const mins = Math.floor(this.remainingTime / 60);
+                const secs = this.remainingTime % 60;
+                document.getElementById('timerTime').textContent = 
+                    `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+
+                // Progress info
+                const totalCycles = this.currentSession.cycles.length;
+                const cycle = this.currentSession.cycles[this.cycleIndex];
+                const totalSubcycles = cycle.subcycles.length;
+                const subcycle = cycle.subcycles[this.subcycleIndex];
+                
+                document.getElementById('timerStatus').textContent = 
+                    this.isInRest ? '💤 Rest' : '🏃 Exercise';
+                
+                document.getElementById('progressInfo').textContent = 
+                    `Cycle ${this.cycleIndex + 1}/${totalCycles} | ` +
+                    `Subcycle ${this.subcycleIndex + 1}/${totalSubcycles} | ` +
+                    `Rep ${this.exerciseRepIndex + 1}/${subcycle.repetitions}`;
+            }
+
+            complete() {
+                this.playBeep(1000, 0.5);
+                setTimeout(() => this.playBeep(1200, 0.5), 200);
+                this.speak('Session complete');
+                document.getElementById('timerName').textContent = '🎉 Complete!';
+                document.getElementById('timerTime').textContent = '✓';
+                this.stop();
+            }
+
+            sleep(ms) {
+                return new Promise(resolve => setTimeout(resolve, ms));
+            }
+
+            // Editor functions
+            newSession() {
+                this.editingIndex = -1;
+                this.showEditor();
+                document.getElementById('sessionName').value = '';
+                document.getElementById('cycleRestTime').value = 45;
+                document.getElementById('cyclesList').innerHTML = '';
+                this.addCycle();
+            }
+
+            editSession(index) {
+                this.editingIndex = index;
+                const session = this.sessions[index];
+                this.showEditor();
+                
+                document.getElementById('sessionName').value = session.name;
+                document.getElementById('cycleRestTime').value = session.cycleRestTime;
+                
+                document.getElementById('cyclesList').innerHTML = '';
+                session.cycles.forEach(cycle => this.addCycle(cycle));
+            }
+
+            showEditor() {
+                this.switchTab('editor');
+                document.getElementById('editorCard').style.display = 'block';
+            }
+
+            cancelEdit() {
+                document.getElementById('editorCard').style.display = 'none';
+            }
+
+            addCycle(cycleData = null) {
+                const container = document.getElementById('cyclesList');
+                const cycleIndex = container.children.length;
+                
+                const cycleDiv = document.createElement('div');
+                cycleDiv.className = 'card';
+                cycleDiv.style.background = 'rgba(255,255,255,0.08)';
+                cycleDiv.innerHTML = `
+                    <div class="collapsible">
+                        <strong>Cycle ${cycleIndex + 1}</strong>
+                        <button class="icon-btn" onclick="this.closest('.card').remove()">🗑️</button>
+                    </div>
+                    <div class="collapsible-content open">
+                        <div class="form-group">
+                            <label class="form-label">Subcycle Rest Time (seconds)</label>
+                            <input type="number" class="subcycle-rest" value="${cycleData?.subcycleRestTime || 0}" min="0">
+                        </div>
+                        <button class="btn btn-success" style="margin-bottom: 15px;" onclick="app.addSubcycle(this)">
+                            ➕ Add Subcycle
+                        </button>
+                        <div class="subcycles-list"></div>
+                    </div>
+                `;
+                
+                container.appendChild(cycleDiv);
+                
+                if (cycleData?.subcycles) {
+                    cycleData.subcycles.forEach(subcycle => {
+                        this.addSubcycle(cycleDiv.querySelector('.btn-success'), subcycle);
+                    });
+                } else {
+                    this.addSubcycle(cycleDiv.querySelector('.btn-success'));
+                }
+            }
+
+            addSubcycle(btn, subcycleData = null) {
+                const subcyclesList = btn.nextElementSibling;
+                
+                const subcycleDiv = document.createElement('div');
+                subcycleDiv.style.background = 'rgba(255,255,255,0.05)';
+                subcycleDiv.style.padding = '15px';
+                subcycleDiv.style.borderRadius = '10px';
+                subcycleDiv.style.marginBottom = '15px';
+                subcycleDiv.innerHTML = `
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 15px;">
+                        <strong>Exercise</strong>
+                        <button class="icon-btn" onclick="this.closest('div[style*=background]').remove()">🗑️</button>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Exercise Name</label>
+                        <input type="text" class="ex-name" value="${subcycleData?.exerciseName || ''}" placeholder="e.g., Extension">
+                    </div>
+                    <div class="grid-3">
+                        <div class="form-group">
+                            <label class="form-label">Duration (sec)</label>
+                            <input type="number" class="ex-duration" value="${subcycleData?.duration || 30}" min="1">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Repetitions</label>
+                            <input type="number" class="ex-reps" value="${subcycleData?.repetitions || 1}" min="1">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Rest (sec)</label>
+                            <input type="number" class="ex-rest" value="${subcycleData?.exerciseRestTime || 10}" min="0">
+                        </div>
+                    </div>
+                `;
+                
+                subcyclesList.appendChild(subcycleDiv);
+            }
+
+            saveCurrentSession() {
+                const name = document.getElementById('sessionName').value.trim();
+                const cycleRestTime = parseInt(document.getElementById('cycleRestTime').value);
+
+                if (!name) {
+                    alert('Please enter a session name');
+                    return;
+                }
+
+                const cycles = [];
+                document.querySelectorAll('#cyclesList > .card').forEach(cycleDiv => {
+                    const subcycleRestTime = parseInt(cycleDiv.querySelector('.subcycle-rest').value);
+                    const subcycles = [];
+
+                    cycleDiv.querySelectorAll('.subcycles-list > div').forEach(subcycleDiv => {
+                        const exerciseName = subcycleDiv.querySelector('.ex-name').value.trim();
+                        const duration = parseInt(subcycleDiv.querySelector('.ex-duration').value);
+                        const repetitions = parseInt(subcycleDiv.querySelector('.ex-reps').value);
+                        const exerciseRestTime = parseInt(subcycleDiv.querySelector('.ex-rest').value);
+
+                        if (exerciseName && duration > 0) {
+                            subcycles.push({ exerciseName, duration, repetitions, exerciseRestTime });
+                        }
+                    });
+
+                    if (subcycles.length > 0) {
+                        cycles.push({ subcycleRestTime, subcycles });
+                    }
+                });
+
+                if (cycles.length === 0) {
+                    alert('Please add at least one cycle with one exercise');
+                    return;
+                }
+
+                const session = { name, cycleRestTime, cycles };
+
+                if (this.editingIndex >= 0) {
+                    this.sessions[this.editingIndex] = session;
+                } else {
+                    this.sessions.push(session);
+                }
+
+                this.saveSessions();
+                this.cancelEdit();
+                alert('Session saved!');
+            }
+
+            duplicateSession(index) {
+                const session = JSON.parse(JSON.stringify(this.sessions[index]));
+                session.name = session.name + ' (copy)';
+                this.sessions.push(session);
+                this.saveSessions();
+            }
+
+            deleteSession(index) {
+                if (confirm(`Delete "${this.sessions[index].name}"?`)) {
+                    this.sessions.splice(index, 1);
+                    this.saveSessions();
+                }
+            }
+
+            // Import/Export
+            exportSessions() {
+                const text = JSON.stringify(this.sessions, null, 2);
+                navigator.clipboard.writeText(text).then(() => {
+                    alert('Sessions copied to clipboard!');
+                });
+            }
+
+            importSessions() {
+                const text = document.getElementById('importArea').value.trim();
+                
+                if (!text) {
+                    alert('Please paste JSON data');
+                    return;
+                }
+
+                try {
+                    const imported = JSON.parse(text);
+                    if (Array.isArray(imported)) {
+                        this.sessions = imported;
+                        this.saveSessions();
+                        document.getElementById('importArea').value = '';
+                        alert('Sessions imported successfully!');
+                        this.switchTab('sessions');
+                    } else {
+                        alert('Invalid format. Expected an array of sessions.');
+                    }
+                } catch (e) {
+                    alert('Invalid JSON: ' + e.message);
+                }
+            }
+        }
+
+        // Initialize app
+        const app = new PhysioTimer();
+    </script>
+</body>
+</html>
