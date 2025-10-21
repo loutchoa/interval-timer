@@ -296,14 +296,21 @@
 </head>
 <body>
     <div class="container">
-        <h1>⏱️ Physio Timer</h1>
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px;">
+            <h1 style="margin: 0;">⏱️ Physio Timer</h1>
+            <select id="languageSelect" style="width: auto; padding: 10px;">
+                <option value="en">English</option>
+                <option value="fr">Français</option>
+                <option value="da">Dansk</option>
+            </select>
+        </div>
 
         <!-- Tabs -->
         <div class="tabs">
-            <button class="tab active" data-tab="timer">Timer</button>
-            <button class="tab" data-tab="sessions">Sessions</button>
-            <button class="tab" data-tab="editor">Editor</button>
-            <button class="tab" data-tab="import">Import/Export</button>
+            <button class="tab active" data-tab="timer" data-i18n="tab_timer">Timer</button>
+            <button class="tab" data-tab="sessions" data-i18n="tab_sessions">Sessions</button>
+            <button class="tab" data-tab="editor" data-i18n="tab_editor">Editor</button>
+            <button class="tab" data-tab="import" data-i18n="tab_import">Import/Export</button>
         </div>
 
         <!-- TIMER TAB -->
