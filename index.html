@@ -1,0 +1,1030 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <title>Physio Timer</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            text-align: center;
+            font-size: 2em;
+            margin-bottom: 30px;
+        }
+
+        .header-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+        }
+
+        .header-row h1 {
+            margin: 0;
+        }
+
+        .tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            border-bottom: 2px solid rgba(255,255,255,0.2);
+        }
+
+        .tab {
+            padding: 12px 24px;
+            background: none;
+            border: none;
+            color: rgba(255,255,255,0.6);
+            font-size: 1em;
+            cursor: pointer;
+            border-bottom: 3px solid transparent;
+            transition: all 0.3s;
+        }
+
+        .tab.active {
+            color: white;
+            border-bottom-color: white;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .card {
+            background: rgba(255,255,255,0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 25px;
+            margin-bottom: 20px;
+            border: 1px solid rgba(255,255,255,0.2);
+        }
+
+        .timer-display {
+            text-align: center;
+            padding: 40px 20px;
+        }
+
+        .timer-name {
+            font-size: 1.8em;
+            margin-bottom: 20px;
+            font-weight: 600;
+        }
+
+        .timer-time {
+            font-size: 6em;
+            font-weight: bold;
+            font-variant-numeric: tabular-nums;
+            margin: 30px 0;
+        }
+
+        .timer-time.warning {
+            color: #ff6b6b;
+            animation: pulse 0.5s infinite;
+        }
+
+        .timer-status {
+            font-size: 1.2em;
+            color: rgba(255,255,255,0.8);
+        }
+
+        .progress-info {
+            font-size: 1.1em;
+            margin-top: 20px;
+            color: rgba(255,255,255,0.9);
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        .controls {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .btn {
+            padding: 18px;
+            font-size: 1.1em;
+            font-weight: 600;
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s;
+            color: white;
+        }
+
+        .btn:active {
+            transform: scale(0.95);
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            grid-column: 1 / -1;
+        }
+
+        .btn-success {
+            background: #51cf66;
+        }
+
+        .btn-warning {
+            background: #ffd43b;
+            color: #333;
+        }
+
+        .btn-danger {
+            background: #ff6b6b;
+        }
+
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        select {
+            width: 100%;
+            padding: 15px;
+            font-size: 1em;
+            border-radius: 10px;
+            border: 2px solid rgba(255,255,255,0.3);
+            background: rgba(255,255,255,0.2);
+            color: white;
+            cursor: pointer;
+        }
+
+        select option {
+            background: #667eea;
+            color: white;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+        }
+
+        input[type="text"],
+        input[type="number"],
+        textarea {
+            width: 100%;
+            padding: 12px;
+            border-radius: 8px;
+            border: 2px solid rgba(255,255,255,0.3);
+            background: rgba(255,255,255,0.2);
+            color: white;
+            font-size: 1em;
+        }
+
+        input::placeholder,
+        textarea::placeholder {
+            color: rgba(255,255,255,0.5);
+        }
+
+        textarea {
+            min-height: 200px;
+            font-family: monospace;
+            font-size: 0.9em;
+        }
+
+        .session-item {
+            background: rgba(255,255,255,0.15);
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .session-item-name {
+            font-weight: 600;
+            font-size: 1.1em;
+        }
+
+        .session-item-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .icon-btn {
+            background: rgba(255,255,255,0.2);
+            border: none;
+            color: white;
+            width: 40px;
+            height: 40px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1.2em;
+        }
+
+        .icon-btn:hover {
+            background: rgba(255,255,255,0.3);
+        }
+
+        .grid-3 {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 10px;
+        }
+
+        @media (max-width: 600px) {
+            .timer-time {
+                font-size: 4em;
+            }
+            
+            .grid-3 {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header-row">
+            <h1>⏱️ Physio Timer</h1>
+            <div style="display: flex; gap: 10px; align-items: center;">
+                <button id="voiceToggle" class="icon-btn" title="Toggle voice">🔊</button>
+                <select id="languageSelect" style="width: auto; padding: 10px;">
+                    <option value="en">English</option>
+                    <option value="fr">Français</option>
+                    <option value="da">Dansk</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="tabs">
+            <button class="tab active" data-tab="timer" data-i18n="tab_timer">Timer</button>
+            <button class="tab" data-tab="sessions" data-i18n="tab_sessions">Sessions</button>
+            <button class="tab" data-tab="editor" data-i18n="tab_editor">Editor</button>
+            <button class="tab" data-tab="import" data-i18n="tab_import">Import/Export</button>
+        </div>
+
+        <div id="timer-tab" class="tab-content active">
+            <div class="card">
+                <div class="form-group">
+                    <label class="form-label" data-i18n="select_session">Select Session</label>
+                    <select id="sessionSelect">
+                        <option value="">Choose a session...</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="card timer-display">
+                <div class="timer-name" id="timerName" data-i18n="ready">Ready</div>
+                <div class="timer-time" id="timerTime">00:00</div>
+                <div class="timer-status" id="timerStatus" data-i18n="select_to_begin">Select a session to begin</div>
+                <div class="progress-info" id="progressInfo"></div>
+            </div>
+
+            <div class="card">
+                <div class="controls">
+                    <button class="btn btn-primary" id="startBtn" data-i18n="start">▶️ Start</button>
+                    <button class="btn btn-warning" id="pauseBtn" disabled data-i18n="pause">⏸️ Pause</button>
+                    <button class="btn btn-danger" id="stopBtn" disabled data-i18n="stop">⏹️ Stop</button>
+                </div>
+            </div>
+        </div>
+
+        <div id="sessions-tab" class="tab-content">
+            <div class="card">
+                <h2 style="margin-bottom: 20px;" data-i18n="my_sessions">My Sessions</h2>
+                <button class="btn btn-primary" id="newSessionBtn" style="margin-bottom: 20px;" data-i18n="new_session">➕ New Session</button>
+                <div id="sessionsList"></div>
+            </div>
+        </div>
+
+        <div id="editor-tab" class="tab-content">
+            <div class="card">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                    <h2 data-i18n="session_editor">Session Editor</h2>
+                    <select id="editorSessionSelect" style="width: auto;">
+                        <option value="-1" data-i18n="new_session">New Session</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label" data-i18n="session_name">Session Name</label>
+                    <input type="text" id="sessionName" data-i18n="session_name_placeholder" placeholder="e.g., Elbow Rehabilitation">
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label" data-i18n="cycle_rest_time">Cycle Rest Time (seconds)</label>
+                    <input type="number" id="cycleRestTime" value="45" min="0">
+                </div>
+
+                <h3 style="margin: 20px 0;" data-i18n="cycles_title">Cycles</h3>
+                <button class="btn btn-success" id="addCycleBtn" style="margin-bottom: 15px;" data-i18n="add_cycle">➕ Add Cycle</button>
+                <div id="cyclesList"></div>
+
+                <div style="margin-top: 30px; display: flex; gap: 10px;">
+                    <button class="btn btn-primary" id="saveSessionBtn" data-i18n="save_session" style="flex: 1;">💾 Save Session</button>
+                    <button class="btn btn-danger" id="deleteSessionBtn" data-i18n="delete_confirm" style="flex: 1;">🗑️ Delete</button>
+                </div>
+            </div>
+        </div>
+
+        <div id="import-tab" class="tab-content">
+            <div class="card">
+                <h2 style="margin-bottom: 20px;" data-i18n="export_title">Export</h2>
+                <button class="btn btn-success" id="exportBtn" style="margin-bottom: 15px;" data-i18n="copy_clipboard">📋 Copy All Sessions</button>
+                <textarea id="exportArea" readonly style="background: rgba(0,0,0,0.3);"></textarea>
+            </div>
+
+            <div class="card">
+                <h2 style="margin-bottom: 20px;" data-i18n="import_title">Import</h2>
+                <textarea id="importArea" data-i18n="paste_json" placeholder='Paste JSON here...'></textarea>
+                <button class="btn btn-primary" id="importBtn" style="margin-top: 15px;" data-i18n="import_sessions">📥 Import Sessions</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const translations = {
+            en: {
+                tab_timer: 'Timer', tab_sessions: 'Sessions', tab_editor: 'Editor', tab_import: 'Import/Export',
+                select_session: 'Select Session', choose_session: 'Choose a session...', ready: 'Ready',
+                select_to_begin: 'Select a session to begin', start: '▶️ Start', pause: '⏸️ Pause',
+                resume: '▶️ Resume', stop: '⏹️ Stop', stopped: 'Stopped', my_sessions: 'My Sessions',
+                new_session: '➕ New Session', no_sessions: 'No sessions yet. Create one!', cycles: 'cycle(s)',
+                session_editor: 'Session Editor', session_name: 'Session Name',
+                session_name_placeholder: 'e.g., Elbow Rehabilitation', cycle_rest_time: 'Cycle Rest Time (seconds)',
+                cycles_title: 'Cycles', add_cycle: '➕ Add Cycle', save_session: '💾 Save Session',
+                cancel: '✕ Cancel', export_title: 'Export', copy_clipboard: '📋 Copy All Sessions',
+                import_title: 'Import', paste_json: 'Paste JSON here...', import_sessions: '📥 Import Sessions',
+                subcycle_rest_time: 'Subcycle Rest Time (seconds)', add_subcycle: '➕ Add Subcycle',
+                exercise: 'Exercise', exercise_name: 'Exercise Name', exercise_name_placeholder: 'e.g., Extension',
+                duration: 'Duration (sec)', repetitions: 'Repetitions', rest: 'Rest (sec)', cycle: 'Cycle',
+                starting_session: 'Starting session', rest_time: 'Rest', go: 'Go',
+                session_complete: 'Session complete', complete: '🎉 Complete!',
+                exercise_rest: 'Exercise Rest', subcycle_rest: 'Subcycle Rest', cycle_rest: 'Cycle Rest',
+                exercise_label: '🏃 Exercise', rest_label: '💤 Rest', sessions_copied: 'Sessions copied!',
+                sessions_imported: 'Sessions imported!', invalid_json: 'Invalid JSON',
+                session_saved: 'Session saved!', enter_name: 'Please enter a session name',
+                add_one_cycle: 'Please add at least one cycle', delete_confirm: 'Delete',
+                select_first: 'Please select a session first'
+            },
+            fr: {
+                tab_timer: 'Minuteur', tab_sessions: 'Sessions', tab_editor: 'Éditeur', tab_import: 'Import/Export',
+                select_session: 'Sélectionner', choose_session: 'Choisissez une session...', ready: 'Prêt',
+                select_to_begin: 'Sélectionnez une session', start: '▶️ Démarrer', pause: '⏸️ Pause',
+                resume: '▶️ Reprendre', stop: '⏹️ Stop', stopped: 'Arrêté', my_sessions: 'Mes sessions',
+                new_session: '➕ Nouvelle', no_sessions: 'Aucune session', cycles: 'cycle(s)',
+                session_editor: 'Éditeur', session_name: 'Nom',
+                session_name_placeholder: 'ex: Rééducation coude', cycle_rest_time: 'Repos entre cycles (sec)',
+                cycles_title: 'Cycles', add_cycle: '➕ Ajouter cycle', save_session: '💾 Enregistrer',
+                cancel: '✕ Annuler', export_title: 'Exporter', copy_clipboard: '📋 Copier tout',
+                import_title: 'Importer', paste_json: 'Collez JSON ici...', import_sessions: '📥 Importer',
+                subcycle_rest_time: 'Repos entre sous-cycles (sec)', add_subcycle: '➕ Ajouter sous-cycle',
+                exercise: 'Exercice', exercise_name: 'Nom exercice', exercise_name_placeholder: 'ex: Extension',
+                duration: 'Durée (sec)', repetitions: 'Répétitions', rest: 'Repos (sec)', cycle: 'Cycle',
+                starting_session: 'Début session', rest_time: 'Repos', go: 'Go',
+                session_complete: 'Session terminée', complete: '🎉 Terminé!',
+                exercise_rest: 'Repos exercice', subcycle_rest: 'Repos sous-cycle', cycle_rest: 'Repos cycle',
+                exercise_label: '🏃 Exercice', rest_label: '💤 Repos', sessions_copied: 'Copié!',
+                sessions_imported: 'Importé!', invalid_json: 'JSON invalide',
+                session_saved: 'Enregistré!', enter_name: 'Entrez un nom',
+                add_one_cycle: 'Ajoutez un cycle', delete_confirm: 'Supprimer',
+                select_first: 'Sélectionnez d\'abord'
+            },
+            da: {
+                tab_timer: 'Timer', tab_sessions: 'Sessioner', tab_editor: 'Editor', tab_import: 'Import/Export',
+                select_session: 'Vælg', choose_session: 'Vælg session...', ready: 'Klar',
+                select_to_begin: 'Vælg en session', start: '▶️ Start', pause: '⏸️ Pause',
+                resume: '▶️ Genoptag', stop: '⏹️ Stop', stopped: 'Stoppet', my_sessions: 'Mine sessioner',
+                new_session: '➕ Ny', no_sessions: 'Ingen sessioner', cycles: 'cyklus(ser)',
+                session_editor: 'Editor', session_name: 'Navn',
+                session_name_placeholder: 'f.eks. Albue', cycle_rest_time: 'Hvile mellem cyklusser (sek)',
+                cycles_title: 'Cyklusser', add_cycle: '➕ Tilføj cyklus', save_session: '💾 Gem',
+                cancel: '✕ Annuller', export_title: 'Eksporter', copy_clipboard: '📋 Kopier alt',
+                import_title: 'Importer', paste_json: 'Indsæt JSON...', import_sessions: '📥 Importer',
+                subcycle_rest_time: 'Hvile mellem undercyklusser (sek)', add_subcycle: '➕ Tilføj undercyklus',
+                exercise: 'Øvelse', exercise_name: 'Øvelsesnavn', exercise_name_placeholder: 'f.eks. Udstrækning',
+                duration: 'Varighed (sek)', repetitions: 'Gentagelser', rest: 'Hvile (sek)', cycle: 'Cyklus',
+                starting_session: 'Starter', rest_time: 'Hvile', go: 'Kør',
+                session_complete: 'Færdig', complete: '🎉 Færdig!',
+                exercise_rest: 'Øvelse hvile', subcycle_rest: 'Undercyklus hvile', cycle_rest: 'Cyklus hvile',
+                exercise_label: '🏃 Øvelse', rest_label: '💤 Hvile', sessions_copied: 'Kopieret!',
+                sessions_imported: 'Importeret!', invalid_json: 'Ugyldig JSON',
+                session_saved: 'Gemt!', enter_name: 'Indtast navn',
+                add_one_cycle: 'Tilføj cyklus', delete_confirm: 'Slet',
+                select_first: 'Vælg først'
+            }
+        };
+
+        class PhysioTimer {
+            constructor() {
+                this.sessions = [];
+                this.currentSession = null;
+                this.currentSessionIndex = -1;
+                this.isRunning = false;
+                this.isPaused = false;
+                this.audioContext = null;
+                this.editingIndex = -1;
+                this.currentLang = 'en';
+                this.voiceEnabled = false;  // Voice OFF by default
+                this.cycleIndex = 0;
+                this.subcycleIndex = 0;
+                this.exerciseRepIndex = 0;
+                this.isInRest = false;
+                this.remainingTime = 0;
+                this.init();
+            }
+
+            init() {
+                this.initAudio();
+                this.loadLanguage();
+                this.loadSessions();
+                this.setupEventListeners();
+                this.updateUI();
+                this.updateLanguage();
+            }
+
+            initAudio() {
+                this.audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            }
+
+            loadLanguage() {
+                const saved = localStorage.getItem('physioLang');
+                if (saved && translations[saved]) {
+                    this.currentLang = saved;
+                    document.getElementById('languageSelect').value = saved;
+                }
+                const voiceSaved = localStorage.getItem('physioVoice');
+                if (voiceSaved !== null) {
+                    this.voiceEnabled = voiceSaved === 'true';
+                }
+                this.updateVoiceButton();
+            }
+
+            saveLanguage() {
+                localStorage.setItem('physioLang', this.currentLang);
+            }
+
+            t(key) {
+                return translations[this.currentLang][key] || translations.en[key] || key;
+            }
+
+            updateLanguage() {
+                document.querySelectorAll('[data-i18n]').forEach(el => {
+                    const key = el.getAttribute('data-i18n');
+                    if (el.tagName === 'INPUT' || el.tagName === 'TEXTAREA') {
+                        el.placeholder = this.t(key);
+                    } else {
+                        el.textContent = this.t(key);
+                    }
+                });
+                this.updateUI();
+            }
+
+            getVoiceLang() {
+                const map = { 'en': 'en-US', 'fr': 'fr-FR', 'da': 'da-DK' };
+                return map[this.currentLang] || 'en-US';
+            }
+
+            playBeep(freq = 800, dur = 0.2) {
+                const osc = this.audioContext.createOscillator();
+                const gain = this.audioContext.createGain();
+                osc.connect(gain);
+                gain.connect(this.audioContext.destination);
+                osc.frequency.value = freq;
+                osc.type = 'sine';
+                gain.gain.setValueAtTime(0.3, this.audioContext.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.01, this.audioContext.currentTime + dur);
+                osc.start(this.audioContext.currentTime);
+                osc.stop(this.audioContext.currentTime + dur);
+            }
+
+            updateVoiceButton() {
+                const btn = document.getElementById('voiceToggle');
+                btn.textContent = this.voiceEnabled ? '🔊' : '🔇';
+                btn.style.opacity = this.voiceEnabled ? '1' : '0.5';
+            }
+
+            speak(text) {
+                if (!this.voiceEnabled || !('speechSynthesis' in window)) return;
+                
+                // Cancel any ongoing speech
+                window.speechSynthesis.cancel();
+                
+                const utterance = new SpeechSynthesisUtterance(text);
+                utterance.lang = this.getVoiceLang();
+                utterance.rate = 0.85;  // Slower
+                utterance.pitch = 1.0;
+                utterance.volume = 1.0;
+                
+                // Try to find a better voice
+                const voices = window.speechSynthesis.getVoices();
+                const langCode = this.getVoiceLang();
+                
+                // Prefer natural/premium voices
+                let voice = voices.find(v => 
+                    v.lang.startsWith(langCode.split('-')[0]) && 
+                    (v.name.includes('Google') || v.name.includes('Enhanced') || v.name.includes('Premium'))
+                );
+                
+                // Fallback to any voice in the right language
+                if (!voice) {
+                    voice = voices.find(v => v.lang.startsWith(langCode.split('-')[0]));
+                }
+                
+                if (voice) {
+                    utterance.voice = voice;
+                }
+                
+                window.speechSynthesis.speak(utterance);
+            }
+
+            loadSessions() {
+                const stored = localStorage.getItem('physioSessions');
+                if (stored) {
+                    this.sessions = JSON.parse(stored);
+                } else {
+                    this.sessions = [{
+                        name: "Elbow Rehabilitation",
+                        cycleRestTime: 45,
+                        cycles: [{
+                            subcycleRestTime: 0,
+                            subcycles: [{
+                                exerciseName: "Extension-Flexion",
+                                duration: 20,
+                                repetitions: 1,
+                                exerciseRestTime: 10
+                            }]
+                        }]
+                    }];
+                    this.saveSessions();
+                }
+            }
+
+            saveSessions() {
+                localStorage.setItem('physioSessions', JSON.stringify(this.sessions));
+                this.updateUI();
+            }
+
+            setupEventListeners() {
+                document.getElementById('voiceToggle').addEventListener('click', () => {
+                    this.voiceEnabled = !this.voiceEnabled;
+                    localStorage.setItem('physioVoice', this.voiceEnabled);
+                    this.updateVoiceButton();
+                });
+
+                document.getElementById('languageSelect').addEventListener('change', (e) => {
+                    this.currentLang = e.target.value;
+                    this.saveLanguage();
+                    this.updateLanguage();
+                });
+
+                document.querySelectorAll('.tab').forEach(tab => {
+                    tab.addEventListener('click', () => this.switchTab(tab.dataset.tab));
+                });
+
+                document.getElementById('sessionSelect').addEventListener('change', (e) => {
+                    if (e.target.value !== '') this.selectSession(parseInt(e.target.value));
+                });
+
+                document.getElementById('editorSessionSelect').addEventListener('change', (e) => {
+                    this.loadSessionIntoEditor(parseInt(e.target.value));
+                });
+
+                document.getElementById('startBtn').addEventListener('click', () => this.start());
+                document.getElementById('pauseBtn').addEventListener('click', () => this.togglePause());
+                document.getElementById('stopBtn').addEventListener('click', () => this.stop());
+                document.getElementById('newSessionBtn').addEventListener('click', () => this.newSession());
+                document.getElementById('addCycleBtn').addEventListener('click', () => this.addCycle());
+                document.getElementById('saveSessionBtn').addEventListener('click', () => this.saveCurrentSession());
+                document.getElementById('deleteSessionBtn').addEventListener('click', () => this.deleteCurrentSession());
+                document.getElementById('exportBtn').addEventListener('click', () => this.exportSessions());
+                document.getElementById('importBtn').addEventListener('click', () => this.importSessions());
+            }
+
+            switchTab(tabName) {
+                document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+                document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+                document.querySelector(`[data-tab="${tabName}"]`).classList.add('active');
+                document.getElementById(`${tabName}-tab`).classList.add('active');
+            }
+
+            updateUI() {
+                this.updateSessionSelect();
+                this.updateEditorSessionSelect();
+                this.updateSessionsList();
+                this.updateExportArea();
+            }
+
+            updateSessionSelect() {
+                const select = document.getElementById('sessionSelect');
+                select.innerHTML = `<option value="">${this.t('choose_session')}</option>`;
+                this.sessions.forEach((session, index) => {
+                    const option = document.createElement('option');
+                    option.value = index;
+                    option.textContent = session.name;
+                    select.appendChild(option);
+                });
+            }
+
+            updateEditorSessionSelect() {
+                const select = document.getElementById('editorSessionSelect');
+                select.innerHTML = `<option value="-1">${this.t('new_session')}</option>`;
+                this.sessions.forEach((session, index) => {
+                    const option = document.createElement('option');
+                    option.value = index;
+                    option.textContent = session.name;
+                    select.appendChild(option);
+                });
+            }
+
+            updateSessionsList() {
+                const container = document.getElementById('sessionsList');
+                if (this.sessions.length === 0) {
+                    container.innerHTML = `<p>${this.t('no_sessions')}</p>`;
+                    return;
+                }
+                container.innerHTML = this.sessions.map((s, i) => `
+                    <div class="session-item">
+                        <div>
+                            <div class="session-item-name">${s.name}</div>
+                            <div style="font-size:0.9em;opacity:0.7">${s.cycles.length} ${this.t('cycles')}</div>
+                        </div>
+                        <div class="session-item-actions">
+                            <button class="icon-btn" onclick="app.editSession(${i})">✏️</button>
+                            <button class="icon-btn" onclick="app.duplicateSession(${i})">📋</button>
+                            <button class="icon-btn" onclick="app.deleteSession(${i})">🗑️</button>
+                        </div>
+                    </div>
+                `).join('');
+            }
+
+            updateExportArea() {
+                document.getElementById('exportArea').value = JSON.stringify(this.sessions, null, 2);
+            }
+
+            selectSession(index) {
+                this.currentSession = this.sessions[index];
+                this.currentSessionIndex = index;
+                document.getElementById('timerName').textContent = this.currentSession.name;
+                document.getElementById('timerStatus').textContent = this.t('select_to_begin');
+            }
+
+            start() {
+                if (!this.currentSession) {
+                    alert(this.t('select_first'));
+                    return;
+                }
+                this.isRunning = true;
+                this.isPaused = false;
+                this.cycleIndex = 0;
+                this.subcycleIndex = 0;
+                this.exerciseRepIndex = 0;
+                document.getElementById('startBtn').disabled = true;
+                document.getElementById('pauseBtn').disabled = false;
+                document.getElementById('stopBtn').disabled = false;
+                this.speak(this.t('starting_session'));
+                this.runSession();
+            }
+
+            togglePause() {
+                this.isPaused = !this.isPaused;
+                document.getElementById('pauseBtn').textContent = this.isPaused ? this.t('resume') : this.t('pause');
+            }
+
+            stop() {
+                this.isRunning = false;
+                this.isPaused = false;
+                document.getElementById('startBtn').disabled = false;
+                document.getElementById('pauseBtn').disabled = true;
+                document.getElementById('stopBtn').disabled = true;
+                document.getElementById('timerTime').classList.remove('warning');
+                document.getElementById('timerStatus').textContent = this.t('stopped');
+            }
+
+            async runSession() {
+                for (this.cycleIndex = 0; this.cycleIndex < this.currentSession.cycles.length; this.cycleIndex++) {
+                    if (!this.isRunning) return;
+                    await this.runCycle(this.currentSession.cycles[this.cycleIndex]);
+                    if (this.cycleIndex < this.currentSession.cycles.length - 1 && this.currentSession.cycleRestTime > 0) {
+                        await this.runRest('cycle_rest', this.currentSession.cycleRestTime);
+                    }
+                }
+                this.complete();
+            }
+
+            async runCycle(cycle) {
+                for (this.subcycleIndex = 0; this.subcycleIndex < cycle.subcycles.length; this.subcycleIndex++) {
+                    if (!this.isRunning) return;
+                    await this.runSubcycle(cycle.subcycles[this.subcycleIndex]);
+                    if (this.subcycleIndex < cycle.subcycles.length - 1 && cycle.subcycleRestTime > 0) {
+                        await this.runRest('subcycle_rest', cycle.subcycleRestTime);
+                    }
+                }
+            }
+
+            async runSubcycle(subcycle) {
+                for (this.exerciseRepIndex = 0; this.exerciseRepIndex < subcycle.repetitions; this.exerciseRepIndex++) {
+                    if (!this.isRunning) return;
+                    await this.runExercise(subcycle.exerciseName, subcycle.duration);
+                    if (this.exerciseRepIndex < subcycle.repetitions - 1 && subcycle.exerciseRestTime > 0) {
+                        await this.runRest('exercise_rest', subcycle.exerciseRestTime);
+                    }
+                }
+            }
+
+            async runExercise(name, duration) {
+                this.isInRest = false;
+                document.getElementById('timerName').textContent = name;
+                this.speak(name);
+                this.playBeep(800, 0.2);
+                await this.countdown(duration);
+            }
+
+            async runRest(name, duration) {
+                this.isInRest = true;
+                document.getElementById('timerName').textContent = this.t(name);
+                this.speak(this.t('rest_time'));
+                this.playBeep(400, 0.2);
+                await this.countdown(duration);
+            }
+
+            async countdown(seconds) {
+                this.remainingTime = seconds;
+                while (this.remainingTime > 0) {
+                    if (!this.isRunning) return;
+                    while (this.isPaused) {
+                        await this.sleep(100);
+                        if (!this.isRunning) return;
+                    }
+                    this.updateTimerDisplay();
+                    if (this.remainingTime <= 3) {
+                        document.getElementById('timerTime').classList.add('warning');
+                        this.playBeep(1200, 0.1);
+                        if (this.remainingTime === 1) {
+                            this.speak(this.t('go'));
+                        }
+                    } else {
+                        document.getElementById('timerTime').classList.remove('warning');
+                    }
+                    await this.sleep(1000);
+                    this.remainingTime--;
+                }
+                document.getElementById('timerTime').classList.remove('warning');
+            }
+
+            updateTimerDisplay() {
+                const mins = Math.floor(this.remainingTime / 60);
+                const secs = this.remainingTime % 60;
+                document.getElementById('timerTime').textContent = 
+                    `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+                document.getElementById('timerStatus').textContent = 
+                    this.isInRest ? this.t('rest_label') : this.t('exercise_label');
+                const cycle = this.currentSession.cycles[this.cycleIndex];
+                const subcycle = cycle.subcycles[this.subcycleIndex];
+                document.getElementById('progressInfo').textContent = 
+                    `${this.t('cycle')} ${this.cycleIndex + 1}/${this.currentSession.cycles.length} | ` +
+                    `Subcycle ${this.subcycleIndex + 1}/${cycle.subcycles.length} | ` +
+                    `Rep ${this.exerciseRepIndex + 1}/${subcycle.repetitions}`;
+            }
+
+            complete() {
+                this.playBeep(1000, 0.5);
+                setTimeout(() => this.playBeep(1200, 0.5), 200);
+                this.speak(this.t('session_complete'));
+                document.getElementById('timerName').textContent = this.t('complete');
+                document.getElementById('timerTime').textContent = '✓';
+                this.stop();
+            }
+
+            sleep(ms) {
+                return new Promise(resolve => setTimeout(resolve, ms));
+            }
+
+            newSession() {
+                this.switchTab('editor');
+                document.getElementById('editorSessionSelect').value = '-1';
+                this.loadSessionIntoEditor(-1);
+            }
+
+            editSession(index) {
+                this.switchTab('editor');
+                document.getElementById('editorSessionSelect').value = index;
+                this.loadSessionIntoEditor(index);
+            }
+
+            loadSessionIntoEditor(index) {
+                this.editingIndex = index;
+                
+                if (index >= 0 && index < this.sessions.length) {
+                    const session = this.sessions[index];
+                    document.getElementById('sessionName').value = session.name;
+                    document.getElementById('cycleRestTime').value = session.cycleRestTime;
+                    document.getElementById('cyclesList').innerHTML = '';
+                    session.cycles.forEach(cycle => this.addCycle(cycle));
+                    document.getElementById('deleteSessionBtn').style.display = 'block';
+                } else {
+                    // New session
+                    document.getElementById('sessionName').value = '';
+                    document.getElementById('cycleRestTime').value = 45;
+                    document.getElementById('cyclesList').innerHTML = '';
+                    this.addCycle();
+                    document.getElementById('deleteSessionBtn').style.display = 'none';
+                }
+            }
+
+            showEditor() {
+                this.switchTab('editor');
+            }
+
+            cancelEdit() {
+                // Not needed anymore - editor is always visible
+            }
+
+            addCycle(cycleData = null) {
+                const container = document.getElementById('cyclesList');
+                const cycleIndex = container.children.length;
+                const cycleDiv = document.createElement('div');
+                cycleDiv.className = 'card';
+                cycleDiv.style.background = 'rgba(255,255,255,0.08)';
+                cycleDiv.innerHTML = `
+                    <div style="display:flex;justify-content:space-between;margin-bottom:15px;">
+                        <strong>${this.t('cycle')} ${cycleIndex + 1}</strong>
+                        <button class="icon-btn" onclick="this.closest('.card').remove()">🗑️</button>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">${this.t('subcycle_rest_time')}</label>
+                        <input type="number" class="subcycle-rest" value="${cycleData?.subcycleRestTime || 0}" min="0">
+                    </div>
+                    <button class="btn btn-success" style="margin-bottom:15px;" onclick="app.addSubcycle(this)">
+                        ${this.t('add_subcycle')}
+                    </button>
+                    <div class="subcycles-list"></div>
+                `;
+                container.appendChild(cycleDiv);
+                if (cycleData?.subcycles) {
+                    cycleData.subcycles.forEach(s => this.addSubcycle(cycleDiv.querySelector('.btn-success'), s));
+                } else {
+                    this.addSubcycle(cycleDiv.querySelector('.btn-success'));
+                }
+            }
+
+            addSubcycle(btn, subcycleData = null) {
+                const list = btn.nextElementSibling;
+                const div = document.createElement('div');
+                div.style.cssText = 'background:rgba(255,255,255,0.05);padding:15px;border-radius:10px;margin-bottom:15px;';
+                div.innerHTML = `
+                    <div style="display:flex;justify-content:space-between;margin-bottom:15px;">
+                        <strong>${this.t('exercise')}</strong>
+                        <button class="icon-btn" onclick="this.closest('div').remove()">🗑️</button>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">${this.t('exercise_name')}</label>
+                        <input type="text" class="ex-name" value="${subcycleData?.exerciseName || ''}" 
+                               placeholder="${this.t('exercise_name_placeholder')}">
+                    </div>
+                    <div class="grid-3">
+                        <div class="form-group">
+                            <label class="form-label">${this.t('duration')}</label>
+                            <input type="number" class="ex-duration" value="${subcycleData?.duration || 30}" min="1">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">${this.t('repetitions')}</label>
+                            <input type="number" class="ex-reps" value="${subcycleData?.repetitions || 1}" min="1">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">${this.t('rest')}</label>
+                            <input type="number" class="ex-rest" value="${subcycleData?.exerciseRestTime || 10}" min="0">
+                        </div>
+                    </div>
+                `;
+                list.appendChild(div);
+            }
+
+            saveCurrentSession() {
+                const name = document.getElementById('sessionName').value.trim();
+                const cycleRestTime = parseInt(document.getElementById('cycleRestTime').value);
+                if (!name) {
+                    alert(this.t('enter_name'));
+                    return;
+                }
+                const cycles = [];
+                document.querySelectorAll('#cyclesList > .card').forEach(cycleDiv => {
+                    const subcycleRestTime = parseInt(cycleDiv.querySelector('.subcycle-rest').value);
+                    const subcycles = [];
+                    cycleDiv.querySelectorAll('.subcycles-list > div').forEach(subDiv => {
+                        const exerciseName = subDiv.querySelector('.ex-name').value.trim();
+                        const duration = parseInt(subDiv.querySelector('.ex-duration').value);
+                        const repetitions = parseInt(subDiv.querySelector('.ex-reps').value);
+                        const exerciseRestTime = parseInt(subDiv.querySelector('.ex-rest').value);
+                        if (exerciseName && duration > 0) {
+                            subcycles.push({ exerciseName, duration, repetitions, exerciseRestTime });
+                        }
+                    });
+                    if (subcycles.length > 0) {
+                        cycles.push({ subcycleRestTime, subcycles });
+                    }
+                });
+                if (cycles.length === 0) {
+                    alert(this.t('add_one_cycle'));
+                    return;
+                }
+                const session = { name, cycleRestTime, cycles };
+                if (this.editingIndex >= 0) {
+                    this.sessions[this.editingIndex] = session;
+                } else {
+                    this.sessions.push(session);
+                }
+                this.saveSessions();
+                this.cancelEdit();
+                alert(this.t('session_saved'));
+            }
+
+            duplicateSession(index) {
+                const session = JSON.parse(JSON.stringify(this.sessions[index]));
+                session.name = session.name + ' (copy)';
+                this.sessions.push(session);
+                this.saveSessions();
+                // Open the new copy in editor
+                this.editSession(this.sessions.length - 1);
+            }
+
+            deleteCurrentSession() {
+                if (this.editingIndex < 0) {
+                    alert('No session to delete');
+                    return;
+                }
+                if (confirm(`${this.t('delete_confirm')} "${this.sessions[this.editingIndex].name}"?`)) {
+                    this.sessions.splice(this.editingIndex, 1);
+                    this.saveSessions();
+                    this.loadSessionIntoEditor(-1);
+                }
+            }
+
+            deleteSession(index) {
+                if (confirm(`${this.t('delete_confirm')} "${this.sessions[index].name}"?`)) {
+                    this.sessions.splice(index, 1);
+                    this.saveSessions();
+                }
+            }
+
+            exportSessions() {
+                const text = JSON.stringify(this.sessions, null, 2);
+                navigator.clipboard.writeText(text).then(() => {
+                    alert(this.t('sessions_copied'));
+                });
+            }
+
+            importSessions() {
+                const text = document.getElementById('importArea').value.trim();
+                if (!text) {
+                    alert('Paste JSON');
+                    return;
+                }
+                try {
+                    const imported = JSON.parse(text);
+                    if (Array.isArray(imported)) {
+                        this.sessions = imported;
+                        this.saveSessions();
+                        document.getElementById('importArea').value = '';
+                        alert(this.t('sessions_imported'));
+                        this.switchTab('sessions');
+                    } else {
+                        alert(this.t('invalid_json'));
+                    }
+                } catch (e) {
+                    alert(this.t('invalid_json') + ': ' + e.message);
+                }
+            }
+        }
+
+        const app = new PhysioTimer();
+    </script>
+</body>
+</html>
